@@ -1,0 +1,79 @@
+;HTML Tags
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Frameset//EN" "http://www.w3.org/TR/REC-html40/frameset.dtd">
+<ADDRESS></ADDRESS>
+<BLOCKQUOTE CITE="url"></BLOCKQUOTE>
+<CENTER></CENTER>
+<DIV ALIGN=[ left | center | right | justify ] ></DIV>
+<H1 ALIGN=[ left | center | right | justify ] ></H1>
+<H2 ALIGN=[ left | center | right | justify ] ></H2>
+<H3 ALIGN=[ left | center | right | justify ] ></H3>
+<H4 ALIGN=[ left | center | right | justify ] ></H4>
+<HR ALIGN=[ left | center | right ] NOSHADE SIZE=Pixels WIDTH=Length>
+<OL TYPE=[ 1 | a | A | i | I ] START=Number COMPACT></OL> 
+<P ALIGN=[ left | center | right | justify ] ></P>
+<PRE WIDTH=Number></PRE> 
+<TABLE ALIGN=[ left | center | right ] BGCOLOR=Color  SUMMARY=Text WIDTH=Length BORDER=Pixels FRAME=[ void | above | below | hsides | lhs | rhs | vsides | box | border ] RULES=[ none | groups | rows | cols | all ] CELLSPACING=Length CELLPADDING=Length >{Enter}{Enter}</TABLE>{Up}{Tab}
+<UL TYPE=[ disc | square | circle ] >{Enter}{Enter}</UL>{Up}{Tab}
+<LI TYPE=[ disc | square | circle | 1 | a | A | i | I ] VALUE=Number>{Enter}{Enter}</LI>{Up}{Tab}
+<TBODY ALIGN=[ left | center | right | justify | char ] VALIGN=[ top | middle | bottom | baseline ] CHAR=Character CHAROFF=Length>{Enter}{Enter}</TBODY>{Up}{Tab}
+;HTML Tags End
+;
+table.sort(t,f)
+;HTP Tags
+<!--- comment --->{Enter}
+<ALTTEXT name="imagename" [ text="imagetext" ]>{Enter}
+<BLOCK NAME="blockname"  [global] [expand]>{Enter}{Enter}</BLOCK>{Up}{Tab}
+<BLOCKDEF name="tagname" [option="option1 [option2 ...]" ] [global] [expand]>{Enter}{Enter}</BLOCKDEF>{Up}{Tab}
+<DEF name="tagname" [option="option1 [option2 ...]" ] [global] [expand]>{Enter}{Enter}</DEF>{Up}{Tab}
+<ELSE>{Enter}
+<ELSEIF conditional>{Enter}
+<ELSEIF NOT conditional>{Enter}
+<FILE [ name="filename" ] date[ ="format" ]>{Enter}
+<FILE [ name="filename" ] size[ = (byte|kbyte|mbyte|gbyte) ] [precision=n]>{Enter}
+<FILE [ name="filename" ] time[ ="format" ]>{Enter}
+<FILE execute="command-line" (output="filename" | redirect) [noerror]>{Enter}
+<FILE include="includefilename" [parameters ...]>{Enter}
+<FILE name>{Enter}
+<FILE search="searchpath">{Enter}
+<FILE template="templatefilename">{Enter}
+<IF conditional>{Enter}{Enter}</IF>{Up}{Tab}
+<IF NOT conditional>{Enter}{Enter}</IF>{Up}{Tab}
+<IMAGEURL url="imageurl" [ path="path/in/local/filesystem" ]>{Enter}
+<IMG src="filename" ...>{Enter}
+<INC macroname1="increment1" [macroname2="increment2" ... ] [GLOBAL]>{Enter}
+<OPT CONDENSE>{Enter}
+<OPT DELIM=CURLY>{Enter}
+<OPT DELIM=HTML>{Enter}
+<OPT DELIM=SQUARE>{Enter}
+<OPT DEPEND>{Enter}
+<OPT IMGXY>{Enter}
+<OPT NOCONDENSE)>{Enter}
+<OPT NODEPEND)>{Enter}
+<OPT NOIMGXY>{Enter}
+<OPT NOPRECIOUS)>{Enter}
+<OPT PRECIOUS>{Enter}
+<OPT QUIET>{Enter}
+<OPT SEMICONDENSE>{Enter}
+<OPT VERBOSE)>{Enter}
+<OPT XML=FALSE>{Enter}
+<OPT XML>{Enter}
+<OUTPUT FILE="outputfilename" [APPEND] [EXPAND]>{Enter}{Enter}</OUTPUT>{Up}{Tab}
+<QUOTE TAG [ATTRIBUTE=VALUE ...]>{Enter}
+<SET macroname1="macrovalue1" [macroname2="macrovalue2" ...] [GLOBAL]>{Enter}
+<UNDEF tagname1 tagname2 ... >{Enter}
+<UNSET macroname1 macroname2 ... >{Enter}
+<USE macroname [parameters ...] [noexpand]>{Enter}
+<WHILE conditional>{Enter}{Enter}</WHILE>{Up}{Tab}
+<WHILE NOT conditional>{Enter}{Enter}</WHILE>{Up}{Tab}
+;HTP Tags End
+
+
+
+
+
+
+
+

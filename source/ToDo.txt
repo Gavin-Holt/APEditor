@@ -1,0 +1,33 @@
+
+Todo
+    Add files to editor from command line
+	Calculations
+    Markdown syntax highlight
+    Replace in selection with esc codes
+    Prompt reload on file change
+    SetEvents  - FileChange
+        HE_SetEvents(hEdit,Handler	 = 	"",Events	 = 	"selchange")
+
+Done
+    Ctrl+Shift+G
+    Ctrl+K
+    Ctrl+Shift+K
+    Ctrl+Alt+J
+    Ctrl+Alt+T
+	Ctrl+Enter (DateStamp)
+    Tabs = 4 all the time
+	Focus on open
+    ReplaceAll
+    PrefixMenu
+    FileMenu_Close - Cancel
+    FileMenu_Close - Quit if last window
+    Open at last edit position
+    Ctrl+Wheel to change font size
+    Ctrl+M (Mark position)
+    Go Back
+    Go Forward
+
+Can't do
+    Stop NHS mail deleting the binary!!!
+
+

@@ -1,0 +1,116 @@
+; C++ Hex encoded RGB
+; Backup!
+	colors=
+	(
+	Text				= 0x0
+	Back				= 0xFFFFFF
+	SelText				= 0xFFFFFF
+	ActSelBack			= 0xc56a31
+	InSelBack			= 0xAAAAAA
+	LineNumber			= 0x0
+	SelBarBack			= 0xAAAAAA
+	NonPrintableBack	= 0x0
+	Number				= 0x0
+	)
+
+; ** Solarized colour theme from http://ethanschoonover.com/solarized **
+
+	BASE03 		=	0x362B00
+	BASE02 		=	0x423607
+	BASE01 		=	0x756E58
+	BASE00 		=	0x837B65
+	BASE0 		=	0x969483
+	BASE1 		=	0xA1A193
+	BASE2 		=	0xD5E8EE
+	BASE3 		=	0xE3F6FD
+	YELLOW 		=	0x0089B5
+	ORANGE 		=	0x164BCB
+	RED 		=	0x2F32DC
+	MAGENTA 	= 	0x8236D3
+	VIOLET 		=	0xC4716C
+	BLUE 		=	0xD28B26
+	CYAN 		=	0x98A12A
+	GREEN 		=	0x009985
+
+; Assign Colours to the Hieditor system colours - format 0xAABBCC
+
+	BACK 		= %BASE3%
+	SELBACKBAR	= %BASE2%
+
+
+	TEXT		= %BASE0%
+	SELTEXT		= %BASE2%
+	ACTSELBACK 	= %BLUE%
+	INSELBACK	= %BASE1%
+	LINENUMBER	= %BASE1%
+	NONPRINTBACK= %BASE0%
+	NUMBER 		= %CYAN%
+
+; Assign colours to the semantic groups for syntax highlighting - format 0x00AABBCC
+
+	DELIMITERS		:= HesDel(BLUE)			;
+	DIRECTIVES		:= HesCol(RED)			;
+	COMMANDS		:= HesCol(RED)			;
+	FUNCTIONS		:= HesCol(BLUE)		    ;
+	METHODS			:= HesCol(VIOLET)		; Methods and Operators
+	VARIABLES		:= HesCol(GREEN)		;
+	STRINGS			:= HesCol(CYAN)		    ;
+	COMMENTS		:= HesCol(LINENUMBER)	;
+	KEYS			:= HesCol(RED)			;
+
+; **End of theme**
+
+; Make custom Highlights.hes
+
+
+	Loop, %A_ScriptDir%\hes\Highlights.hes
+	{
+		FileRead, MyText, %A_ScriptDir%\hes\Highlights.hes
+		if not ErrorLevel  ; Successfully loaded.
+		{
+		; Multi-line substitutions for codes at the begining of lines
+		MyText := RegExReplace(MyText, "m)^0x01DELIMITERS" , DELIMITERS)
+		MyText := RegExReplace(MyText, "m)^0x00DIRECTIVES" , DIRECTIVES)
+		MyText := RegExReplace(MyText, "m)^0x00COMMANDS" , COMMANDS)
+		MyText := RegExReplace(MyText, "m)^0x00FUNCTIONS" , FUNCTIONS)
+		MyText := RegExReplace(MyText, "m)^0x00METHODS" , METHODS)
+
+		MyText := RegExReplace(MyText, "m)^0x00VARIABLES" , VARIABLES)
+		MyText := RegExReplace(MyText, "m)^0x00STRINGS" , STRINGS)
+		MyText := RegExReplace(MyText, "m)^0x00COMMENTS" , COMMENTS)
+		MyText := RegExReplace(MyText, "m)^0x00KEYS" , KEYS)
+
+		; Save the altered file, here as we have the variables!
+		FileDelete, %A_ScriptDir%\Highlights.hes
+		FileAppend, %MyText% ,  %A_ScriptDir%\Highlights.hes
+		} else {
+		msgbox, File not found
+		}
+	}
+
+; Write color matrix
+	colours=
+	(
+		Text 			= %TEXT%
+		Back 			= %BACK%
+		SelText 		= %SELTEXT%
+		ActSelBack 		= %ACTSELBACK%
+		InSelBack 		= %INSELBACK%
+		LineNumber 		= %LINENUMBER%
+		SelBarBack 		= %SELBACKBAR%
+		NonPrintableBack= %NONPRINTBACK%
+		Number			= %NUMBER%
+	)
+
+	HesDel(COL){
+
+		COL := SubStr(COL,3,6)
+		COL := "0x01"COL
+		return COL
+	}
+
+	HesCol(COL){
+		COL := SubStr(COL,3,6)
+		COL := "0x00"COL
+		return COL
+	}
