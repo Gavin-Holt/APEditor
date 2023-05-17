@@ -6,6 +6,7 @@
 ; -	AHKPAd			Michael Peters
 ; -	QuickAHK  		(jballi)
 ; -	Vic Editor		Normand Lamoureux (Normand)
+; - Adventure IDE   Alguimist
 ;
 ; I have tried to avoid operations that load the whole file - preferring to process a line at a time,
 ; exceptions include:
@@ -13,10 +14,6 @@
 ; -	FileMenu_OpenTemplate:	Read whole file in then inserts
 ; -	EditMenu_FindREDown:	Reads the rest of the file before each search
 ; -	InsertMenu_File:	Reads whole file in then inserts
-
-; Trying to allow multiple launches
-; If alreadyrunning then pass message and close
-
 
 ;# Setup AHK Environment
 #SingleInstance Off
@@ -29,13 +26,16 @@ SetBatchLines,-1
 SetControlDelay,-1
 SetWinDelay,-1
 ListLines, Off
-DetectHiddenWindows, On
+DetectHiddenWindows,On
 SetTitleMatchMode,2
 SendMode, Input
 Process,Priority,,A
-CoordMode, Mouse, Relative
+CoordMode,Mouse,Relative
 
-; $MySingleInstance()
+;# Single Instance
+; I can't get this to work
+; Therefore all launches are via APRunner.exe
+; Launching APEditor.exe will kill any other running instance - with data loss.
 
 ;# GUI SETUP
 Gui, +LastFound +Resize
@@ -46,7 +46,7 @@ Gui, font, s12, Consolas   ; This does not seem to work with the menu fonts
 Gui, Margin, 0,0
 Gui, Add, Picture, HWNDToolBack x0 y0 w965 h44 BackgroundTrans,img/bluegrad.bmp
 Gui, Add, Picture, gFileMenu_New x10 y6 BackgroundTrans, img/newbutton.png
-Gui, Add, Picture, gFileMenu_OpenShortcut x50 y6 BackgroundTrans, img/openbutton.png
+Gui, Add, Picture, gFileMenu_Open x50 y6 BackgroundTrans, img/openbutton.png
 Gui, Add, Picture, gFileMenu_Save x90 y6 BackgroundTrans, img/savebutton.png
 Gui, Add, Picture, x130 y6 BackgroundTrans, img/sep.bmp
 
@@ -84,8 +84,9 @@ $MenuCreate()
 
 ; Default menu settings
 Menu, FileMenu, Check, &Monitor
-Menu, OptionsMenu, Check, &Line Numbers
+Menu, OptionsMenu, Check, Line &Numbers
 Menu, OptionsMenu, Check, &Auto Indent
+Menu, OptionsMenu, Check, &Light
 
 ; Display menu
 Gui, Menu, MyMenuBar
@@ -100,8 +101,7 @@ fFace  := "Consolas"
 HE_SetFont(hEdit, fStyle "," fFace)
 fTAB   := 4
 HE_SetTabWidth(hEdit,fTAB)
-; #include hes/DarkColours.hes
-#include hes/LightColours.hes
+Gosub, OptionsMenu_Light
 HE_SetColors(hEdit, colours)
 HE_SetKeywordFile( "APEditor.hes")
 HE_AutoIndent(hedit, true), $AutoIndent := true
@@ -125,10 +125,11 @@ If Input
     ; Set focus on *File1 for typing!
     ControlFocus, HiEdit1
 }
-;End of Autoexec Section: Defined by return/exit/hotkeys
+
+;# End of Autoexec Section: Defined by return/exit/hotkeys
+return
 
 ;# Hotkeys
-SetTitleMatchMode, 2
 #IfWinActive ahk_class AutoHotkeyGUI
 
 	^A::	$CMDCall("SelectMenu_All")
@@ -146,7 +147,7 @@ SetTitleMatchMode, 2
 	^L::	$CMDCall("SelectMenu_LineDown")
 	^M::	$CMDCall("EditMenu_Mark")
 	^N::	$CMDCall("FileMenu_New")
-	^O::	$CMDCall("FileMenu_OpenShortCut")
+	^O::	$CMDCall("FileMenu_Open")
 	^P::	$CMDCall("FileMenu_Print")
 	^Q::	$CMDCall("BlockMenu_Comment")
 	^R::	$CMDCall("FileMenu_Revert")
@@ -173,7 +174,7 @@ SetTitleMatchMode, 2
 	^+L::	$CMDCall("SelectMenu_LineUp")
 	^+N::	$CMDCall("")
 	^+M::	$CMDCall("")
-	^+O::   $CMDCall("")
+	^+O::   $CMDCall("FileMenu_OpenSelected")
 	^+P::	$CMDCall("")
 	^+Q::   $CMDCall("")
 	^+R::	$CMDCall("")
@@ -233,7 +234,7 @@ SetTitleMatchMode, 2
 	F11::	$CMDCall("")
 
 
-	!Enter::	$CMDCall("InsertMenu_DateStamp")
+    !Enter::	$CMDCall("InsertMenu_DateStamp")
 	+Enter::	SendInput <br>
 	; ^Enter::	Adds line below - see HiEditor defaults
 
@@ -291,29 +292,6 @@ SetTitleMatchMode, 2
 ;# Windows Global Keys
 ; - Avoid global windows keys
 
-;# Single instance
-; https://www.autohotkey.com/board/topic/76240-single-instance-force-compiled-scripts-only/
-$MySingleInstance() {
-    If $FirstInstance() {
-        msgbox "First instance"
-    } else {
-        msgbox "New instance"
-        ExitApp
-    }
-}
-
-$FirstInstance() {
-    local FirstInstancePID
-    Process, Exist, %A_ScriptName%
-    FirstInstancePID := ErrorLevel
-    if (FirstInstancePID = DllCall("GetCurrentProcessId"))
-    {
-        return, true
-    } else {
-        return, false
-    }
-}
-
 ;# Menu Definitons
 $MenuCreate(){
 
@@ -322,7 +300,7 @@ $MenuCreate(){
 	Menu, FileMenu, Add, Rever&t	Ctrl+R,MenuHandler
 	Menu, FileMenu, Add, &Close	Ctrl+W,MenuHandler
 	Menu, FileMenu, Add,
-	Menu, FileMenu, Add, Open Se&lection...	Ctrl+Shift+O,MenuHandler
+	Menu, FileMenu, Add, Open Se&lected	Ctrl+Shift+O,MenuHandler
 	Menu, FileMenu, Add, Open &Template...	Ctrl+Alt+T,MenuHandler
 	Menu, FileMenu, Add,
 	Menu, FileMenu, Add, &Save	Ctrl+S,MenuHandler
@@ -456,10 +434,12 @@ $MenuCreate(){
 
 	Menu, OptionsMenu, Add, &Font,MenuHandler
 	Menu, OptionsMenu, Add, &Tabs,MenuHandler
-	Menu, OptionsMenu, Add, &Colours,MenuHandler
 	Menu, OptionsMenu, Add, Syta&x Colours,MenuHandler
 	Menu, OptionsMenu, Add
-	Menu, OptionsMenu, Add, &Line Numbers,MenuHandler
+	Menu, OptionsMenu, Add, &Light,MenuHandler
+	Menu, OptionsMenu, Add, &Dark,MenuHandler
+	Menu, OptionsMenu, Add
+	Menu, OptionsMenu, Add, Line &Numbers,MenuHandler
 	Menu, OptionsMenu, Add, &Auto Indent,MenuHandler
 	Menu, OptionsMenu, Add
 	Menu, OptionsMenu, Add, F&ull Screen,MenuHandler
@@ -544,17 +524,30 @@ $SetTitle(hEdit,$hwnd){
 	return
 }
 
+$HesDel(COL){
+    COL := SubStr(COL,3,6)
+    COL := "0x01"COL
+    return COL
+}
+
+$HesCol(COL){
+    COL := SubStr(COL,3,6)
+    COL := "0x00"COL
+    return COL
+}
+
 ;# Command subroutines
 
 Egg:
 	MsgBox,48,"Easter Egg","OK, now I have egg on my face!"
+	$SpellCheck(hEdit,"")
 	return
 
 FileMenu_New:
 	HE_NewFile(hEdit)
 	return
 
-FileMenu_OpenShortCut:
+FileMenu_OpenSelected:
 	; If a filename in the text is selected open it!
 	Sel := HE_GetSelText(hEdit)
 	If (FileExist(Sel) and InStr(FileExist(Sel), "D")=0 ){
@@ -1580,7 +1573,7 @@ ProjectMenu_Makeit:
         return
 	}
 	$CMDCall("FileMenu_SaveAll")
-	$ToolsCall(hEdit,"shelexec.exe",MyFilePath . "\MakeIt.bat")
+	$ToolsCall(hEdit,"shelexec.exe", MyFilePath . "\MakeIt.bat")
 	return
 
 ProjectMenu_Jobs:
@@ -1658,7 +1651,11 @@ ToolsMenu_Shell:
 	return
 
 ToolsMenu_Calculate:
-	; ToDo ToolsMenu_Calculate
+	Gosub, $GetBlock
+	If (Block="") {
+		return
+	}
+    Run, O:\MyProfile\lua\lua51.exe -l extensions -i -e "%Block%" ,""
 	return
 
 ToolsMenu_Diff:
@@ -1683,14 +1680,134 @@ OptionsMenu_Tabs:
 	HE_SetTabWidth(hEdit, w)
 	return
 
-OptionsMenu_Colours:
-	FileSelectFile, fn, 3, %A_ScriptDir%\hes, "Select a colour file ...", (*.hes)
-    HE_SetColors(hEdit, colours) ; assign to the edit control
-	return
-
 OptionsMenu_SytaxColours:
 	FileSelectFile, fn, 3, %A_ScriptDir%\hes, "Select a syntax highlight file ...", (*.hes)
 	HE_SetKeywordFile(fn)
+	return
+
+; OptionsMenu_Colours:  ; Can't update the control without Exec function!!
+; 	FileSelectFile, fn, 3, %A_ScriptDir%\hes, "Select a colour file ...", (*.hes)
+;     HE_SetColors(hEdit, colours)
+; 	return
+
+OptionsMenu_Light:
+
+    ; ** Solarized colour theme from http://ethanschoonover.com/solarized **
+
+	BASE03 		=	0x362B00
+	BASE02 		=	0x423607
+	BASE01 		=	0x756E58
+	BASE00 		=	0x837B65
+	BASE0 		=	0x969483
+	BASE1 		=	0xA1A193
+	BASE2 		=	0xD5E8EE
+	BASE3 		=	0xE3F6FD
+	YELLOW 		=	0x0089B5
+	ORANGE 		=	0x164BCB
+	RED 		=	0x2F32DC
+	MAGENTA 	= 	0x8236D3
+	VIOLET 		=	0xC4716C
+	BLUE 		=	0xD28B26
+	CYAN 		=	0x98A12A
+	GREEN 		=	0x009985
+
+
+	BACK 		= %BASE3%
+	SELBACKBAR	= %BASE2%
+
+
+	TEXT		= %BASE0%
+	SELTEXT		= %BASE2%
+	ACTSELBACK 	= %BLUE%
+	INSELBACK	= %BASE1%
+	LINENUMBER	= %BASE1%
+	NONPRINTBACK= %BASE0%
+	NUMBER 		= %CYAN%
+
+	DELIMITERS		:= $HesDel(BLUE)
+	DIRECTIVES		:= $HesCol(RED)
+	COMMANDS		:= $HesCol(RED)
+	FUNCTIONS		:= $HesCol(BLUE)
+	METHODS			:= $HesCol(VIOLET)
+	VARIABLES		:= $HesCol(GREEN)
+	STRINGS			:= $HesCol(CYAN)
+	COMMENTS		:= $HesCol(LINENUMBER)
+	KEYS			:= $HesCol(RED)
+
+	colours=
+	(
+		Text 			= %TEXT%
+		Back 			= %BACK%
+		SelText 		= %SELTEXT%
+		ActSelBack 		= %ACTSELBACK%
+		InSelBack 		= %INSELBACK%
+		LineNumber 		= %LINENUMBER%
+		SelBarBack 		= %SELBACKBAR%
+		NonPrintableBack= %NONPRINTBACK%
+		Number			= %NUMBER%
+	)
+    HE_SetColors(hEdit, colours)
+    Menu, OptionsMenu, Check, &Light
+    Menu, OptionsMenu, UnCheck, &Dark
+	return
+
+OptionsMenu_Dark:
+
+    ; ** Solarized colour theme from http://ethanschoonover.com/solarized **
+
+	BASE03 	=	0x362B00
+	BASE02 	=	0x423607
+	BASE01 	=	0x756E58
+	BASE00 	=	0x837B65
+	BASE0 	=	0x969483
+	BASE1 	=	0xA1A193
+	BASE2 	=	0xD5E8EE
+	BASE3 	=	0xE3F6FD
+	YELLOW 	=	0x0089B5
+	ORANGE 	=	0x164BCB
+	RED 	=	0x2F32DC
+	MAGENTA = 	0x8236D3
+	VIOLET 	=	0xC4716C
+	BLUE 	=	0xD28B26
+	CYAN 	=	0x98A12A
+	GREEN 	=	0x009985
+
+	BACK 		= %BASE03%
+	SELBACKBAR	= %BASE02%
+	TEXT		= %BASE0%
+	SELTEXT		= %BASE2%
+	ACTSELBACK 	= %BLUE%
+	INSELBACK	= %BASE1%
+	LINENUMBER	= %BASE1%
+	NONPRINTBACK= %BASE0%
+	NUMBER 		= %CYAN%
+
+	DELIMITERS		:= $HesDel(BLUE)
+	DIRECTIVES		:= $HesCol(RED)
+	COMMANDS		:= $HesCol(RED)
+	FUNCTIONS		:= $HesCol(BLUE)
+	METHODS			:= $HesCol(VIOLET)
+	VARIABLES		:= $HesCol(GREEN)
+	STRINGS			:= $HesCol(CYAN)
+	COMMENTS		:= $HesCol(LINENUMBER)
+	KEYS			:= $HesCol(RED)
+
+	colours=
+	(
+		Text 			= %TEXT%
+		Back 			= %BACK%
+		SelText 		= %SELTEXT%
+		ActSelBack 		= %ACTSELBACK%
+		InSelBack 		= %INSELBACK%
+		LineNumber 		= %LINENUMBER%
+		SelBarBack 		= %SELBACKBAR%
+		NonPrintableBack= %NONPRINTBACK%
+		Number			= %NUMBER%
+	)
+
+    HE_SetColors(hEdit, colours)
+    Menu, OptionsMenu, Check, &Dark
+    Menu, OptionsMenu, UnCheck, &Light
 	return
 
 OptionsMenu_FullScreen:
@@ -1748,30 +1865,31 @@ HelpMenu_Keys:
 	return
 
 HelpMenu_About:
-	msg := "A programmable editor`n`n"
+	msg := "A programmable editor in AHK " . A_AHKVersion . "`n`n"
 		. "  HiEdit control is copyright of Antonis Kyprianou:`n"
 		. "     http://www.winasm.net`n`n"
 		. "  AHK wrapper by Majkinetor:`n"
 		. "     https://github.com/majkinetor/mm-autohotkey`n`n"
-		. "  Editor functionality by Gavin Holt"
+		. "  Editor functionality by Gavin Holt`n"
+		. "     https://github.com/Gavin-Holt/APEditor`n`n"
 	MsgBox, 48, About, %msg%
 	return
 
 WinDisable:
 	; Get current window
-	 Winget, WindowID
-	 WinSet, ExStyle, -0x20, ahk_id %WindowID%
-	 WinSet, Disable,, ahk_id %WindowID%
-	 GuiControl,, ToggleDisable, Enable
+	Winget, WindowID
+	WinSet, ExStyle, -0x20, ahk_id %WindowID%
+	WinSet, Disable,, ahk_id %WindowID%
+	GuiControl,, ToggleDisable, Enable
 	return
 
 WinEnable:
 	; Get current window
-	 Winget, WindowID
-	 WinSet, Enable,, ahk_id %WindowID%
-	 WinSet, ExStyle, -0x20, ahk_id %WindowID%
-	 GuiControl,, ToggleDisable, Disable
-	 WinActivate,  ahk_id %WindowID%
+	Winget, WindowID
+	WinSet, Enable,, ahk_id %WindowID%
+	WinSet, ExStyle, -0x20, ahk_id %WindowID%
+	GuiControl,, ToggleDisable, Disable
+	WinActivate,  ahk_id %WindowID%
 	return
 
 FontInc:
@@ -1820,7 +1938,7 @@ $OpenFile(hEdit,fn) {
 $GotoLine(hEdit, line) {
 	line_idx := HE_LineIndex(hEdit, line-1)
 	HE_SetSel(hEdit, line_idx, line_idx)
-	HE_ScrollCaret(hEdit )
+	HE_ScrollCaret(hEdit)
 	return
 }
 
@@ -1982,7 +2100,6 @@ GuiEscape:
 GuiClose:
 OnExit:
 	$CMDCall("FileMenu_Exit")
-; 	ExitApp
 	return
 
 GuiDropFiles:
@@ -2011,9 +2128,10 @@ GuiDropFiles:
 ;# Includes
 ; Library files
 #include inc\Attach.ahk
-#include inc\COM.ahk
+; #include inc\COM.ahk
 #include inc\Dlg.ahk
 #include inc\HIEdit.ahk
+#include inc\Spell.ahk
 
 ; Print by Jballi
 #include inc\HiEdit_Print.ahk
@@ -2023,3 +2141,4 @@ GuiDropFiles:
 #include plg\Autocorrect.ahk
 #include plg\Grammar.ahk
 #include plg\DyslexicTypos.ahk
+#include plg\SpellCheck.ahk
