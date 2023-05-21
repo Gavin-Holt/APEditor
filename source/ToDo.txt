@@ -26,10 +26,23 @@ Done
     Open at last edit position
     Ctrl+Wheel to change font size
     Ctrl+M (Mark position)
-    Go Back
-    Go Forward
+    Go Back to mark
+    Go Forward to mark
+    Fix TextDiff starting directory
+    Fix MakeIt.bat location
+    Green Comments
+    Better Blue for Dark Mode
 
 Can't do
     Stop NHS mail deleting the binary!!!
 
-
+Spellcheck workflow
+	Get text 
+	Parse into word list
+	Make list unique 
+	Remove well spelled
+	Ask for remaining
+	Do substitution(s) in original text
+	Put text
+	
+	

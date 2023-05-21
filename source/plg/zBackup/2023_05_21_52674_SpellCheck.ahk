@@ -1,13 +1,5 @@
-; This is my spellcheck plugin - built upon the shoulders of giants!
-; Adding words to the user_dict.dic does not work!
-; Requirements
-;	Designed to be #included in APEditor
-;		https://github.com/Gavin-Holt/APEditor
-; 		Using very old AHK/AHK2EXE (ver 1.0.48.05)
-; 	Spell.ahk (2.0) jballi
-;		https://www.autohotkey.com/boards/viewtopic.php?t=4971
-;		I copied Hunspellx86.dll to my Hunspell folder
-;	See hard coded paths throughout
+; This is my spellcheck plugin for HiEdit
+;  as usual much is borrowed for online examples :)
 #include inc\Spell.ahk
 
 $SpellCheck(hEdit, sText){
@@ -15,7 +7,7 @@ $SpellCheck(hEdit, sText){
     ; Destroy previous iterations
     Spell_Uninit(hSpell)
     tText =
-    Replacement =
+    Replacement = 0
 
 	; Initialize
 	if not Spell_Init(hSpell,"O:\MyProfile\editor\hunspell\en_GB.aff", "O:\MyProfile\editor\hunspell\en_GB.dic","O:\MyProfile\editor\hunspell\Hunspellx86.dll")
@@ -57,20 +49,17 @@ $SpellCheck(hEdit, sText){
 	StringReplace, tText, tText, #, %A_Space% , All
 	StringReplace, tText, tText, @, %A_Space% , All
 	StringReplace, tText, tText, ~, %A_Space% , All
-	StringReplace, tText, tText, $, %A_Space% , All
 	StringReplace, tText, tText, |, %A_Space% , All
 	StringReplace, tText, tText, \, %A_Space% , All
 	StringReplace, tText, tText, /, %A_Space% , All
 	StringReplace, tText, tText, ", %A_Space% , All
 ; 	StringReplace, tText, tText, ', %A_Space% , All
 	StringReplace, tText, tText, :, %A_Space% , All
-	StringReplace, tText, tText, _, %A_Space% , All
 	StringReplace, tText, tText, %A_Space%-%A_Space%, %A_Space% , All
 	StringReplace, tText, tText, %A_Space%%A_Space%, %A_Space% , All
 	StringReplace, tText, tText, %A_Space%%A_Space%, %A_Space% , All
 	StringReplace, tText, tText, %A_Space%%A_Space%, %A_Space% , All
 
-	; Filter down to just misspelled words
 	Loop, Parse, tText, %A_Space%
 	{
 		Word = %A_LoopField%
@@ -87,28 +76,22 @@ $SpellCheck(hEdit, sText){
 			continue
 		}
 
-		; --- From here we have a new word to check
+		; Launch the GUI
+		Spell_Suggest(hSpell, Word, sList)
+ 		Replacement := $SpellCheckGUI(hEdit, Word, sList)
 
-		; Generate suggestions
- 		Spell_Suggest(hSpell, Word, sList)
- 		if not sList
+		; Use the Replacement
+		if Strlen(Replacement) > 1
 		{
-			sList = No suggestions
+			; Replace in the original string (whole words)
+			StringReplace, sText, sText, %A_Space%%Word%%A_Space%, %A_Space%%Replacement%%A_Space%, All
+
 		}
 
-    	; Call GUI for decision - disable current GUI
-    	Replacement := $SpellCheckGUI(Word, sList)
-
-    	; Remember the word to avoid re-asking
-    	Spell_Add(hSpell,Word)
-
-    	if not Replacement
-    	{
-    		continue
-    	} else {
-			; Replace in the original string (whole words)
-			sText := RegExReplace(sText,"m)\b" . Word . "\b",Replacement)
-    	}
+        ; Clear variables
+        Word =
+        Replacement =
+        sList =
 
 	}
 
@@ -129,15 +112,21 @@ $SpellCheck(hEdit, sText){
     ; Clear variables
     sText =
     tText =
-    Replacement =
+
+	Return
 }
 
-$SpellCheckGUI(Word, sList){
+
+$SpellCheckGUI(hEdit, Word, sList){
 	Global
 	; Ensure all global variables
 
-	; Clear variables
 	Suggestion =
+
+	if not sList
+	{
+		sList = "No suggestions"
+	}
 
 	; Setup the GUI
 	Gui, 2:+Owner +ToolWindow +AlwaysOnTop +Delimiter`n
@@ -155,11 +144,10 @@ $SpellCheckGUI(Word, sList){
 	; Show child
 	Gui, 2:Show, 			x142 	y369 	w363	h193, Spell Check
 
-	; Loop until a decision is made  (GUI cannot be modal and stop a loop)
-	NextWord = 0
+	; Loop until a selection is made  (GUI cannot be modal and stop a loop)
 	Loop,
 	{
-		if NextWord > 0
+		if %hEdit%%Word%
 		{
 			Break
 		} else {
@@ -170,41 +158,36 @@ $SpellCheckGUI(Word, sList){
 
 	; This is Submit
 	Gui 2:Destroy
-	Gui, 1:show
 	Return %Suggestion%
 
 ; Gui subroutines
 2ButtonIgnore:
+	%hEdit%%Word% = %Word%
     ; Record so we don't ask again
     Spell_Add(hSpell, Word, "L")
 	Suggestion = 0
-	NextWord = 1
 	Return
 
 2ButtonReplace:
 	Gui, Submit, NoHide
-	if (Suggestion = "No suggestions")
-	{
-		Suggestion = 0
-	}
-	NextWord = 1
+	%hEdit%%Word% = %Suggestion%
 	Return
 
-; TODO this does not work!!
 2ButtonAdd:
-  	Spell_AddCustom("O:\MyProfile\editor\hunspell\USER_DICT.dic",Word)
+; 	Spell_AddCustom("O:\MyProfile\editor\hunspell\user.dic",Word)
+	%hEdit%%Word% = %Word%
 	Suggestion = 0
-	NextWord = 1
 	Return
 
 2ButtonCancel:
 2GuiClose:
 2GuiEscape:
 	Gui, 2:Destroy
+	Gui, 1:-0x8000000 ; 0x8000000 is WS_DISABLED
+	Gui, 1:show
 	Suggestion = 0
 	Return
-
-Exit
+ 	Exit
 }
 
 

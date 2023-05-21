@@ -1,4 +1,4 @@
-﻿/*
+/*
 Title: Spell v2.0 (Preview)
 
 Group: Introduction
@@ -9,15 +9,16 @@ Group: Introduction
 Group: Compatibility
 
     This library was designed to run on most versions of Windows (Windows XP+)
-    and on all versions of AutoHotkey including AutoHotkey Basic and AutoHotkey
-    v1.1+ (ANSI and Unicode, 32-bit and 64-bit).
+    and on all versions of AutoHotkey including AutoHotkey Basic (ANSI) and
+    AutoHotkey v1.1+ (ANSI and Unicode, 32-bit and 64-bit).
 
 Group: Credit:
 
     Credit and thanks to *majkinetor* for developing the original Spell library.
     Thanks to *Prodigy* (AutoIt forum) for the idea to use the NHunspell API for
-    version 2.0 of this library and thanks to *ProgAndy* (AutoIt German forum)
-    for providing a copy of the NHunspell DLL files.
+    version 2.0 of this library and for guidance to the syntax of some of API
+    functions.  Thanks to *ProgAndy* (AutoIt German forum) for providing a copy
+    of the NHunspell DLL files.
 
 Group: Functions:
 */
@@ -100,6 +101,10 @@ Group: Functions:
 ;
 ;   The number of words added to the dictionary.
 ;
+; Calls To Other Functions:
+;
+; * <Spell_ANSI2Unicode>
+;
 ; Remarks:
 ;
 ;   The performance of this function is excellent under almost all
@@ -169,7 +174,7 @@ Spell_Add(ByRef hSpell,p_Word,p_AddCase="")
             {
             l_Count++
             l_Word:=A_LoopField
-            RC:=DllCall(NumGet(hSpell,16)
+            DllCall(NumGet(hSpell,16)
                 ,PtrType,NumGet(hSpell,0)
                 ,StrType,A_PtrSize ? l_Word:Spell_ANSI2Unicode(&l_Word,wString)
                 ,"Cdecl")
@@ -253,7 +258,6 @@ Spell_AddCustom(p_CustomDic,p_Word,p_EOL="`r`n")
 
         ;-- Save it
         FileAppend % l_Word . p_EOL,*%p_CustomDic%
-;       I don't understand the *???
         if ErrorLevel
             {
             outputdebug,
@@ -369,7 +373,7 @@ Spell_ANSI2Unicode(lpMultiByteStr,ByRef WideCharStr)
 ;
 ; Calls To Other Functions:
 ;
-; * <Spell_InitCustom>
+; * <Spell_ANSI2Unicode>
 ;
 ; Remarks:
 ;
@@ -495,7 +499,7 @@ Spell_Init(ByRef hSpell,p_Aff,p_Dic,DLLPath="")
     NumPut(hModule,hSpell,8)
 
     ;-- Store function addresses
-    ;   Programming note: Return type when calling "GetProcAddress" is necessary for x64
+    ;   Note: When calling "GetProcAddress", return type is necessary for x64
     StrType:=A_IsUnicode ? "AStr":"Str"
     NumPut(DllCall("GetProcAddress",PtrType,hModule,StrType,"HunspellAdd",PtrType),         hSpell,16)
     NumPut(DllCall("GetProcAddress",PtrType,hModule,StrType,"HunspellAddWithAffix",PtrType),hSpell,24)
@@ -532,8 +536,8 @@ Spell_Init(ByRef hSpell,p_Aff,p_Dic,DLLPath="")
 ;
 ; Description:
 ;
-;   Add words from a custom dictionary file to the dictionary.  Words are valid
-;   until spell object is destroyed.
+;   Add words from a custom dictionary file to the active dictionary.  Words are
+;   valid until spell object is destroyed.
 ;
 ; Parameters:
 ;
@@ -547,7 +551,7 @@ Spell_Init(ByRef hSpell,p_Aff,p_Dic,DLLPath="")
 ; Returns:
 ;
 ;   The number of words loaded to the spell object if successful (can be 0) or
-;   -1 if the custom dictionary file is not found.
+;   -1 if there was an error reading the custom dictionary file.
 ;
 ; Calls To Other Functions:
 ;
@@ -559,10 +563,6 @@ Spell_Init(ByRef hSpell,p_Aff,p_Dic,DLLPath="")
 ;
 ; * The custom dictionary file must be in Unix (EOL=LF) or DOS/Windows
 ;   (EOL=CR+LF) format.
-;
-; * Call this function directly to load more than one custom dictionary or if
-;   use of the p_AddCase parameter is required.  Otherwise, specify the custom
-;   dictionary when calling <Spell_Init>.
 ;
 ;-------------------------------------------------------------------------------
 Spell_InitCustom(ByRef hSpell,p_CustomDic,p_AddCase="")
@@ -595,6 +595,10 @@ Spell_InitCustom(ByRef hSpell,p_CustomDic,p_AddCase="")
 ;
 ;   TRUE if the word was found in the active dictionary, otherwise FALSE.
 ;
+; Calls To Other Functions:
+;
+; * <Spell_ANSI2Unicode>
+;
 ;-------------------------------------------------------------------------------
 Spell_Spell(ByRef hSpell,p_Word)
     {
@@ -618,13 +622,14 @@ Spell_Spell(ByRef hSpell,p_Word)
         ,"Cdecl")
     }
 
+
 ;------------------------------
 ;
 ; Function: Spell_Suggest
 ;
 ; Description:
 ;
-;   Suggest words for word.
+;   Suggest words for a misspelled word.
 ;
 ; Parameters:
 ;
@@ -639,16 +644,33 @@ Spell_Spell(ByRef hSpell,p_Word)
 ;
 ;   Number of words in r_SuggestList.
 ;
+; Calls To Other Functions:
+;
+; * <Spell_ANSI2Unicode>
+; * <Spell_Unicode2ANSI>
+;
 ;-------------------------------------------------------------------------------
 Spell_Suggest(ByRef hSpell,p_Word,ByRef r_SuggestList)
     {
+    Static Dummy3522
+          ,FirstCall:=True
+          ,PtrSize
+          ,PtrType
+          ,StrType
+
+    ;-- Set values for the dynamic static variables
+    if FirstCall
+        {
+        PtrSize:=A_PtrSize ? A_PtrSize:4
+        PtrType:=(A_PtrSize=8) ? "Ptr":"UInt"
+        StrType:=A_IsUnicode ? "Str":A_PtrSize ? "WStr":"UInt"
+        FirstCall:=False
+        }
+
     ;-- Initialize
-    PtrType:=(A_PtrSize=8) ? "Ptr":"UInt"
-    PtrSize:=(A_PtrSize=8) ? 8:4
     r_SuggestList:=""
 
-    ;-- Suggest words
-    StrType:=A_IsUnicode ? "Str":A_PtrSize ? "WStr":"UInt"
+    ;-- Get suggest words
     RC:=DllCall(NumGet(hSpell,80)
         ,PtrType,NumGet(hSpell,0)
         ,StrType,A_PtrSize ? p_Word:Spell_ANSI2Unicode(&p_Word,wString)
@@ -674,7 +696,7 @@ Spell_Suggest(ByRef hSpell,p_Word,ByRef r_SuggestList)
         if A_IsUnicode
             {
             nSize:=DllCall("lstrlenW",PtrType,pSuggestWord)
-                ;-- Length of string in characters.  Size does NOT includes
+                ;-- Length of string in characters.  Size does NOT include the
                 ;   terminating null character.
 
             VarSetCapacity(l_SuggestWord,nSize*2,0)
@@ -780,12 +802,12 @@ Spell_Unicode2ANSI(lpWideCharStr,ByRef MultiByteStr)
 ; Description:
 ;
 ;   Frees the spell object and the memory allocated to the dynamic link library
-;   (DLL) (unless the DLL was loaded outside of this function library).
+;   (DLL).
 ;
 ;-------------------------------------------------------------------------------
 Spell_Uninit(ByRef hSpell)
     {
     PtrType:=(A_PtrSize=8) ? "Ptr":"UInt"
-    RC:=DllCall(NumGet(hSpell,40),PtrType,NumGet(hSpell,0),"Cdecl")
-    RC:=DllCall("FreeLibrary",PtrType,NumGet(hSpell,8))
+    DllCall(NumGet(hSpell,40),PtrType,NumGet(hSpell,0),"Cdecl")
+    DllCall("FreeLibrary",PtrType,NumGet(hSpell,8))
     }

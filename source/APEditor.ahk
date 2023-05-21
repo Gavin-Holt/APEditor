@@ -71,7 +71,7 @@ Gui, Add, Picture, x570 y6 BackgroundTrans, img/sep.bmp
 Gui, Add, Picture, gFileMenu_Print x580 y7 BackgroundTrans, img/printbutton.png
 Gui, Add, Picture, x620 y6 BackgroundTrans, img/sep.bmp
 
-Gui, Add, Picture, gToolsMenu_Shell x630 y7 BackgroundTrans, img/shellbutton.png
+Gui, Add, Picture, gToolsMenu_$hell x630 y7 BackgroundTrans, img/shellbutton.png
 Gui, Add, Picture, gProjectMenu_Run x670 y6 w36 h36  BackgroundTrans, img/runbutton.png
 Gui, Add, Picture, x710 y6 BackgroundTrans, img/sep.bmp
 
@@ -103,7 +103,7 @@ fTAB   := 4
 HE_SetTabWidth(hEdit,fTAB)
 Gosub, OptionsMenu_Light
 HE_SetColors(hEdit, colours)
-HE_SetKeywordFile( "APEditor.hes")
+HE_SetKeywordFile("APEditor.hes")
 HE_AutoIndent(hedit, true), $AutoIndent := true
 HE_LineNumbersBar(hEdit, "automaxsize"), $LineNumbers := true
 
@@ -191,12 +191,12 @@ return
 	^!B::	$CMDCall("ProjectMenu_Backup")
 	^!C::	$CMDCall("")
 	^!D::	$CMDCall("ToolsMenu_Diff")
-	^!E::	$CMDCall("")
+	^!E::	$CMDCall("Egg")
 	^!F:: 	$CMDCall("")
 	^!G::	$CMDCall("")
 	^!H::	$CMDCall("EditMenu_Replaceinfiles")
 	^!I::	$CMDCall("InsertMenu_File")
-	^!J::	$CMDCall("ProjectMenu_Jobs")
+	^!J::	$CMDCall("ProjectMenu_JobsToDo")
 	^!K::	$CMDCall("")
 	^!L::	$CMDCall("")
 	^!M::	$CMDCall("ProjectMenu_MakeIt")
@@ -217,7 +217,7 @@ return
     !W::	    $CMDCall("WindowsMenu_FileList")
     !SC02B::	$CMDCall("ProjectMenu_Folder")
 
-    ^!SC02B::	$CMDCall("ToolsMenu_Shell")
+    ^!SC02B::	$CMDCall("ToolsMenu_$hell")
 	^=::		$CMDCall("ToolsMenu_Calculate")
 
 	^SC027::	$CMDCall("PreMenu_1LineComment") ; ^;
@@ -229,6 +229,7 @@ return
 
 	^F1::	$CMDCall("")
 	F5::	$CMDCall("")
+	^F7::	$CMDCall("ToolsMenu_SpellCheck")
 	F9::	$CMDCall("")
 	F10::	$CMDCall("")
 	F11::	$CMDCall("")
@@ -412,14 +413,15 @@ $MenuCreate(){
 	Menu, ProjectMenu, Add
 	Menu, ProjectMenu, Add, &Run	Ctrl+Alt+R,MenuHandler
 	Menu, ProjectMenu, Add, &Makeit	Ctrl+Alt+M,MenuHandler
-	Menu, ProjectMenu, Add, &Jobs	Ctrl+Alt+J,MenuHandler
+	Menu, ProjectMenu, Add, &Jobs ToDo	Ctrl+Alt+J,MenuHandler
 	Menu, ProjectMenu, Add
 	Menu, ProjectMenu, Add, &Backup	Ctrl+Alt+B,MenuHandler
 	Menu, ProjectMenu, Add, &Versions	Ctrl+Alt+V,MenuHandler
 
+	Menu, ToolsMenu, Add, &SpellCheck	Ctrl+F7,MenuHandler
 	Menu, ToolsMenu, Add, &Calculate	Ctrl+=,MenuHandler
-	Menu, ToolsMenu, Add, &Shell	Ctrl+Alt+#,MenuHandler
-	Menu, ToolsMenu, Add, &Diff	Ctrl+Alt+D,MenuHandler
+	Menu, ToolsMenu, Add, &Diff   	Ctrl+Alt+D,MenuHandler
+	Menu, ToolsMenu, Add, &$hell	Ctrl+Alt+#,MenuHandler
 
 	Menu, ScriptsMenu, Add, &Select,		:SelectMenu
 	Menu, ScriptsMenu, Add, &Insert,		:InsertMenu
@@ -539,8 +541,11 @@ $HesCol(COL){
 ;# Command subroutines
 
 Egg:
-	MsgBox,48,"Easter Egg","OK, now I have egg on my face!"
-	$SpellCheck(hEdit,"")
+	MsgBox,48,Easter Egg, OK - now I have egg on my face!
+
+; 	pFileName := "O:\MyProfile\editor\confAPE\source\ToDo.txt"
+;   ControlGet, hhEdit, Hwnd,, HiEdit1
+; 	HE_OpenFile(hhEdit+0,pFileName)
 	return
 
 FileMenu_New:
@@ -570,12 +575,9 @@ FileMenu_Open:
 	return
 
 FileMenu_OpenTemplate:
-	FileSelectFile, fn, 3, %A_ScriptDir%\..\templates\, Open a generic template
+	FileSelectFile, fn, 3, O:\MyProfile\editor\templates, Open a generic template
 	If Errorlevel {
-		FileSelectFile, fn, 3, %MyFilePath%\_Template\, Open a local template
-		If Errorlevel {
-			return
-		}
+		return
 	}
 
 	HE_NewFile(hEdit)
@@ -655,6 +657,7 @@ FileMenu_Close:
         HE_CloseFile(hEdit, -1)
     } Else {
         HE_CloseFile(hEdit, -1)
+        ; This is where save preferences would go
         ExitApp
     }
 	return
@@ -666,8 +669,6 @@ FileMenu_Exit:
 	{
 		$CMDCall("FileMenu_Close")
 	}
-	; This is where save preferences would go
-	ExitApp
 	return
 
 EditMenu_Undo:
@@ -1568,30 +1569,28 @@ ProjectMenu_Run:
 	return
 
 ProjectMenu_Makeit:
-    IfNotExist, %MyFilePath%
-	{
-        return
+    If FileExist(MyFilePath . "\MakeIt.bat")
+    {
+		$CMDCall("FileMenu_SaveAll")
+		$ToolsCall(hEdit,"shelexec.exe", MyFilePath . "\MakeIt.bat")
 	}
-	$CMDCall("FileMenu_SaveAll")
-	$ToolsCall(hEdit,"shelexec.exe", MyFilePath . "\MakeIt.bat")
 	return
 
-ProjectMenu_Jobs:
-    IfNotExist, %MyFilePath%
+ProjectMenu_JobsToDo:
+    If FileExist(MyFilePath . "\Todo.txt")
     {
-        return
+		$OpenFile(hEdit, MyFilePath .  "\Todo.txt")
 	}
-	$OpenFile(hEdit, MyFilePath .  "\Todo.txt")
 	return
 
 ProjectMenu_Folder:
-    IfNotExist, %MyFilePath%
+    If FileExist(MyFilePath)
 	{
-        return
+	    Run, shelexec.exe %MyFilePath%
 	}
-    Run, shelexec.exe %MyFilePath%
 	return
 
+FileMenu_SaveBackup:
 ProjectMenu_Backup:
     IfNotExist, %MyFilePath%
 	{
@@ -1644,7 +1643,7 @@ ProjectMenu_Versions:
 	}
 	return
 
-ToolsMenu_Shell:
+ToolsMenu_$hell:
 	; Reset FileName as can be called called from button bar
 	Gosub, $GetFilePath
     Run, %ComSpec% , %MyFilePath%
@@ -1659,13 +1658,15 @@ ToolsMenu_Calculate:
 	return
 
 ToolsMenu_Diff:
-	IfNotExist, %MyFilePath%
+	If FileExist(MyFilePath)
 	{
-        return
-	} Else {
-
+		Run, TextDiff.exe %A_Space% %MyFilePath%\%MyFileName% %A_Space% %MyFilePath%\%MyFileName%
 	}
-	$ToolsCall(hEdit,"TextDiff.exe",HE_GetFileName(hEdit))
+	return
+
+ToolsMenu_SpellCheck:
+	Sel := HE_GetSelText(hEdit)
+	$SpellCheck(hedit, Sel)
 	return
 
 OptionsMenu_Font:
@@ -1681,7 +1682,7 @@ OptionsMenu_Tabs:
 	return
 
 OptionsMenu_SytaxColours:
-	FileSelectFile, fn, 3, %A_ScriptDir%\hes, "Select a syntax highlight file ...", (*.hes)
+	FileSelectFile, fn, 3, %A_ScriptDir%, "Select a syntax highlight file ...", (*.hes)
 	HE_SetKeywordFile(fn)
 	return
 
@@ -1711,20 +1712,20 @@ OptionsMenu_Light:
 	CYAN 		=	0x98A12A
 	GREEN 		=	0x009985
 
-
-	BACK 		= %BASE3%
-	SELBACKBAR	= %BASE2%
-
-
 	TEXT		= %BASE0%
+	BACK 		= %BASE3%
 	SELTEXT		= %BASE2%
 	ACTSELBACK 	= %BLUE%
 	INSELBACK	= %BASE1%
 	LINENUMBER	= %BASE1%
+	SELBACKBAR	= %BASE2%
 	NONPRINTBACK= %BASE0%
 	NUMBER 		= %CYAN%
 
+;   How to set these below
+
 	DELIMITERS		:= $HesDel(BLUE)
+	DELIMITERS		:= $HesDel(RED)
 	DIRECTIVES		:= $HesCol(RED)
 	COMMANDS		:= $HesCol(RED)
 	FUNCTIONS		:= $HesCol(BLUE)
@@ -1763,6 +1764,7 @@ OptionsMenu_Dark:
 	BASE1 	=	0xA1A193
 	BASE2 	=	0xD5E8EE
 	BASE3 	=	0xE3F6FD
+	BASE3 	=	0x03F6FD
 	YELLOW 	=	0x0089B5
 	ORANGE 	=	0x164BCB
 	RED 	=	0x2F32DC
@@ -1772,15 +1774,17 @@ OptionsMenu_Dark:
 	CYAN 	=	0x98A12A
 	GREEN 	=	0x009985
 
-	BACK 		= %BASE03%
-	SELBACKBAR	= %BASE02%
 	TEXT		= %BASE0%
+	BACK 		= %BASE03%
 	SELTEXT		= %BASE2%
 	ACTSELBACK 	= %BLUE%
 	INSELBACK	= %BASE1%
 	LINENUMBER	= %BASE1%
+	SELBACKBAR	= %BASE02%
 	NONPRINTBACK= %BASE0%
 	NUMBER 		= %CYAN%
+
+;   How to set these below
 
 	DELIMITERS		:= $HesDel(BLUE)
 	DIRECTIVES		:= $HesCol(RED)
@@ -1866,7 +1870,7 @@ HelpMenu_Keys:
 
 HelpMenu_About:
 	msg := "A programmable editor in AHK " . A_AHKVersion . "`n`n"
-		. "  HiEdit control is copyright of Antonis Kyprianou:`n"
+		. "  HiEdit control " . hEdit . " is copyright of Antonis Kyprianou:`n"
 		. "     http://www.winasm.net`n`n"
 		. "  AHK wrapper by Majkinetor:`n"
 		. "     https://github.com/majkinetor/mm-autohotkey`n`n"
@@ -2066,8 +2070,8 @@ $GetRelPath(CurrentFn,InsertFn){
 }
 
 $ToolsCall(hEdit,fnTool,param){
-	; ToDo $ToolsCall - this fails if param file name has spaces!
-	Run, %fnTool% %A_Space% "%param%",""
+	; ***ToDo $ToolsCall - this fails if filenames have spaces!
+	Run, %fnTool% %A_Space% "%param%", ""
 }
 
 $ComspecCall(hEdit,fnTool,param,output,MyFilePath){
@@ -2128,17 +2132,17 @@ GuiDropFiles:
 ;# Includes
 ; Library files
 #include inc\Attach.ahk
-; #include inc\COM.ahk
 #include inc\Dlg.ahk
 #include inc\HIEdit.ahk
+
+; Libs by Jballi
+#include inc\HiEdit_Print.ahk
 #include inc\Spell.ahk
 
-; Print by Jballi
-#include inc\HiEdit_Print.ahk
-
 ; Plugins - can't load dynamically and are compiled into the exe.
-#include plg\TabExpand.ahk
 #include plg\Autocorrect.ahk
-#include plg\Grammar.ahk
 #include plg\DyslexicTypos.ahk
+#include plg\Grammar.ahk
 #include plg\SpellCheck.ahk
+#include plg\TabExpand.ahk
+
