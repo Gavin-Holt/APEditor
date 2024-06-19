@@ -3,32 +3,31 @@
 DetectHiddenWindows, on
 SetTitleMatchMode,2
 
+vLine = %1%
+StringSplit, vLine,vLine, @
+vFileName 	:= vLine1
+vLineNumber := vLine2
+
 If WinExist("- APEditor")
 {
-    pFileName = %1%
-    If FileExist(pFileName)
-    { 
-;     	pFileName := "O:\MyProfile\editor\confAPE\source\ToDo.txt"
-;     	ControlGet, hhEdit, Hwnd,, HiEdit1, - APEditor
-; 		SendMessage, 2025, 0, &pFileName,, ahk_id %hhEdit%
+
+    If FileExist(vFileName)
+    {
 
         WinActivate
         Send !FO
         Sleep 1000
-        SendInput %pFileName%
+        SendRaw %vFileName%
     }
     Exitapp
 }
 
-If FileExist(A_Temp "\APEditor.exe")
+If FileExist("O:\MyProfile\editor\conf2APE\APEditor.exe")
 {
-    Run, %A_Temp%\APEditor.exe "%1%"
+    Run, O:\MyProfile\editor\conf2APE\APEditor.exe "%vFileName%"
 	ExitApp
 }
 
-If FileExist("O:\MyProfile\editor\confAPE\source\MakeIt.bat")
-{
-	Run, O:\MyProfile\editor\confAPE\source\MakeIt.bat "%1%"
-	ExitApp
-}
+
+
 

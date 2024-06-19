@@ -6,11 +6,14 @@
 ; 		Using very old AHK/AHK2EXE (ver 1.0.48.05)
 ; 	Spell.ahk (2.0) jballi
 ;		https://www.autohotkey.com/boards/viewtopic.php?t=4971
-;		I copied Hunspellx86.dll to my Hunspell folder
-;	See hard coded paths throughout
+
 #include inc\Spell.ahk
 
-$SpellCheck(hEdit, sText){
+$SpellCheck(HiEdit1, sText){
+
+	; Define the path to the hunspell dictionaries
+	;   note I keep my user_dict.dic in here also - read lower down
+	DicPath := "O:\MyProfile\editor\hunspell\"
 
     ; Destroy previous iterations
     Spell_Uninit(hSpell)
@@ -18,17 +21,17 @@ $SpellCheck(hEdit, sText){
     Replacement =
 
 	; Initialize
-	if not Spell_Init(hSpell,"O:\MyProfile\editor\hunspell\en_GB.aff", "O:\MyProfile\editor\hunspell\en_GB.dic","O:\MyProfile\editor\hunspell\Hunspellx86.dll")
+	if not Spell_Init(hSpell,DicPath . "en_GB.aff", DicPath . "en_GB.dic", A_ScriptDir . "\Hunspellx86.dll")
 		return
 
 	; Load the custom dictionary
-	if not Spell_InitCustom(hSpell,"O:\MyProfile\editor\hunspell\user_dict.dic","L")
+	if not Spell_InitCustom(hSpell,DicPath . "user_dict.dic","L")
 		return
 
 	; Check for selection
 	if Strlen(sText) < 1
 	{
-		sText := $GetAllText(hEdit)
+		sText := MyGetAllText(HiEdit1)
 	}
 	if Strlen(sText) < 1
 	{
@@ -97,7 +100,7 @@ $SpellCheck(hEdit, sText){
 		}
 
     	; Call GUI for decision - disable current GUI
-    	Replacement := $SpellCheckGUI(Word, sList)
+    	Replacement := MySpellCheckGUI(Word, sList)
 
     	; Remember the word to avoid re-asking
     	Spell_Add(hSpell,Word)
@@ -121,7 +124,7 @@ $SpellCheck(hEdit, sText){
     StringTrimRight, sText, sText, 1
 
 	; Write back the new text
-	HE_ReplaceSel(hEdit,sText)
+	HE_ReplaceSel(HiEdit1,sText)
 
 	; Release DLL memory
 	Spell_Uninit(hSpell)
@@ -132,7 +135,7 @@ $SpellCheck(hEdit, sText){
     Replacement =
 }
 
-$SpellCheckGUI(Word, sList){
+MySpellCheckGUI(Word, sList){
 	Global
 	; Ensure all global variables
 
@@ -192,7 +195,7 @@ $SpellCheckGUI(Word, sList){
 
 ; TODO this does not work!!
 2ButtonAdd:
-  	Spell_AddCustom("O:\MyProfile\editor\hunspell\USER_DICT.dic",Word)
+;  	Spell_AddCustom(DicPath . "USER_DICT.dic",Word)
 	Suggestion = 0
 	NextWord = 1
 	Return
@@ -206,5 +209,3 @@ $SpellCheckGUI(Word, sList){
 
 Exit
 }
-
-
