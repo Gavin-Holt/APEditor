@@ -43,7 +43,7 @@ Also uses external tools:
 
 ## Functionality
 
-The script uses a very capable edit control (HiEdit.dll) with all the ususal keyboard shortcuts.
+The script uses a very capable edit control (HiEdit.dll) with all the usual keyboard shortcuts.
 
 I have intercepted a few calls for my own use:
 
@@ -53,17 +53,14 @@ I have intercepted a few calls for my own use:
 
 Additional functionality is added using Autohotkey, and specifically the wrapper for the edit control (HiEdit.ahk).
 
-Choosing the minimum set of additional functions has been interesting.
-
-Rather than copying all the functions I have seen in other editors, I have tried to limit myself:
+Choosing the minimum set of additional functions has been interesting. Rather than copying all the functions I have seen in other editors, I have tried to limit myself:
 
 - Functions I regularly
 - Functions that are __really__ useful when needed.
 
-The source code can be modified to add functionality, within the boundaries of the UI and underlying edit control. 
-However, please note there is no way to _word wrap_ in this control.
+The source code can be modified to add functionality, within the boundaries of the UI and underlying edit control. However, please note there is no way to _word wrap_ in this control.
 
-My added fuctions are listed below:
+My added functions are listed below:
 
 1.	Revert to disk version
 2.	Open selected filename
