@@ -1,15 +1,13 @@
 # APEditor
 
 ## Introduction
-
-In an attempt to reduce _cognitive load_ I have resurrected one of my old projects in Autohotkey. 
-My previous version was overloaded, attempting to be an IDE, so I have removed as much a possible.
+This is the compiled version of my AHK scripted editor. In an attempt to reduce _cognitive load_ I have resurrected one of my old projects in Autohotkey. My previous version was overloaded, attempting to be an IDE, so I have removed as much a possible.
 
 ## Perfection
 
 Antoine de Saint-Exupery said _"Perfection is achieved, not when there is nothing more to add, but when there is nothing left to take away"_.
 
-- No launching of other applications (except grep)
+- No launching of other applications (except wingrep and fzf)
 - No CVS
 - No unused shortcuts
 
@@ -21,14 +19,14 @@ The script provides a bare minimum of user interface elements:
 
 - Menus
 - Toolbar
-- Tabbar
+- Tab bar
 - Keyboard shortcuts
 - Input boxes
-- File dialoges
+- File dialogs
+- FZF for selections
 
 ## Requirements
 
-This is the compiled version of my AHK scripted editor:
 1. APEditor.exe
 2. APEditor.dll - I have renamed from HiEdit.dll to keep the files together
 3. APEditor.hes - Keyword file for highlighting
@@ -40,6 +38,7 @@ Also uses external tools:
 3. GetPlainText.exe
 4. Shelexec.exe
 5. TextDiff.exe
+6. FZF.exe and BAT.exe
 
 ## Functionality
 
@@ -47,9 +46,9 @@ The script uses a very capable edit control (HiEdit.dll) with all the usual keyb
 
 I have intercepted a few calls for my own use:
 
-- 	+{Down}     My_CMDCall("SelectMenu_LineDown")
-- 	+{up}       My_CMDCall("SelectMenu_LineUp")
--   ^{BS}       Send +^{Left}{BS}
+- +{Down}     My_CMDCall("SelectMenu_LineDown")
+- +{up}       My_CMDCall("SelectMenu_LineUp")
+- ^{BS}       Send +^{Left}{BS}
 
 Additional functionality is added using Autohotkey, and specifically the wrapper for the edit control (HiEdit.ahk).
 
@@ -89,7 +88,3 @@ My added functions are listed below:
 ## Keyboard shortcuts
 
 I have implemented some of my own keyboard shortcuts, and again choosing the minimum set has been interesting.
-
-
-
-
