@@ -28,6 +28,3 @@ If FileExist("O:\MyProfile\editor\confAPEditor\APEditor.exe")
 	ExitApp
 }
 
-
-
-

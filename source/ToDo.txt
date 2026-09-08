@@ -1,6 +1,5 @@
 
 Todo
-	Centre screen after goto / find
     Replace in selection with esc codes
     Prompt reload on file change
     SetEvents  - FileChange
