@@ -1,9 +1,8 @@
 # APEditor
 
 ## Introduction
-This is the compiled version of my AHK scripted editor. In an attempt to reduce _cognitive load_ I have resurrected one of my old projects in Autohotkey. My previous version was overloaded, attempting to be an IDE, so I have removed as much a possible.
 
-## Perfection
+This is the compiled version of my AHK scripted editor. In an attempt to reduce _cognitive load_ I have resurrected one of my old projects in Autohotkey. My previous version was overloaded, attempting to be an IDE, so I have removed as much a possible.
 
 Antoine de Saint-Exupery said _"Perfection is achieved, not when there is nothing more to add, but when there is nothing left to take away"_.
 
@@ -88,3 +87,7 @@ My added functions are listed below:
 ## Keyboard shortcuts
 
 I have implemented some of my own keyboard shortcuts, and again choosing the minimum set has been interesting.
+
+## Todo
+
+1. Spellcheck won't add words!
