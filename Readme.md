@@ -4,8 +4,6 @@
 
 This is the compiled version of my AHK scripted editor. In an attempt to reduce _cognitive load_ I have resurrected one of my old projects in Autohotkey. My previous version was overloaded, attempting to be an IDE, so I have removed as much a possible.
 
-Antoine de Saint-Exupery said _"Perfection is achieved, not when there is nothing more to add, but when there is nothing left to take away"_.
-
 - No launching of other applications (except wingrep and fzf)
 - No CVS
 - No unused shortcuts

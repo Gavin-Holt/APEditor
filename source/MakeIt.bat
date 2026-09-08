@@ -9,5 +9,5 @@ REM Compile APRunner
 Ahk2Exe.exe /in APRunner.ahk /out ..\APRunner.exe /icon img\APEditor.ico
 
 REM Start
-shelexec.exe /Params:%1 /EXE "..\APRunner.exe"
+.\shelexec.exe /Params:%1 /EXE "..\APRunner.exe"
 exit

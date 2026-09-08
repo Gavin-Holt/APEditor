@@ -1,13 +1,13 @@
 
 Todo
 	Centre screen after goto / find
-    Markdown syntax highlight
     Replace in selection with esc codes
     Prompt reload on file change
     SetEvents  - FileChange
-    Spell check
+    Spell check add words
 
 Done
+    Markdown syntax highlight
     Launcher as separate exe
     Ctrl+Shift+G
     Ctrl+K
