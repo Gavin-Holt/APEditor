@@ -22,9 +22,9 @@ If WinExist("- APEditor")
     Exitapp
 }
 
-If FileExist("O:\MyProfile\editor\conf2APE\APEditor.exe")
+If FileExist("O:\MyProfile\editor\confAPEditor\APEditor.exe")
 {
-    Run, O:\MyProfile\editor\conf2APE\APEditor.exe "%vFileName%"
+    Run, O:\MyProfile\editor\confAPEditor\APEditor.exe "%vFileName%"
 	ExitApp
 }
 
