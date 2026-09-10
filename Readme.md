@@ -40,6 +40,7 @@ Also uses external tools:
 ## Functionality
 
 The script uses a very capable edit control (HiEdit.dll) with all the usual keyboard shortcuts.
+However, please note there is no way to _word wrap_ in this control.
 
 I have intercepted a few calls for my own use:
 
@@ -54,7 +55,7 @@ Choosing the minimum set of additional functions has been interesting. Rather th
 - Functions I regularly
 - Functions that are __really__ useful when needed.
 
-The source code can be modified to add functionality, within the boundaries of the UI and underlying edit control. However, please note there is no way to _word wrap_ in this control.
+The source code can be modified to add functionality, within the boundaries of the UI and underlying edit control.
 
 My added functions are listed below:
 
