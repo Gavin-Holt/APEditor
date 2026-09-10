@@ -9,7 +9,6 @@ I should remove the toolbar, but it helps me remember my context, and look great
 ## User interface
 
 The script provides a bare minimum of user interface elements:
-
 - Menus
 - Toolbar
 - Tab bar
