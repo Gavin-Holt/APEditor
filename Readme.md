@@ -4,10 +4,6 @@
 
 This is the compiled version of my AHK scripted editor. In an attempt to reduce _cognitive load_ I have resurrected one of my old projects in Autohotkey. My previous version was overloaded, attempting to be an IDE, so I have removed as much a possible.
 
-- No launching of other applications (except wingrep and fzf)
-- No CVS
-- No unused shortcuts
-
 I should remove the toolbar, but it helps me remember my context, and look great!
 
 ## User interface
