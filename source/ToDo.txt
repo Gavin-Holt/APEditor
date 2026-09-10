@@ -1,4 +1,3 @@
-
 Todo
     Replace in selection with esc codes
     Prompt reload on file change
